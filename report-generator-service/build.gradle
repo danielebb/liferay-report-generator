@@ -1,0 +1,101 @@
+buildscript {
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		classpath 'org.standardout:bnd-platform:1.5.0'
+		// if using Gradle 1.x uncomment the following line
+//		classpath 'org.codehaus.groovy:groovy-backports-compat23:2.3+'
+	}
+}
+
+apply plugin: 'org.standardout.bnd-platform'
+
+def baseLiferayDir = project.hasProperty('liferay.workspace.home.dir') ? "${project.property('liferay.workspace.home.dir')}" : "${project.rootDir}/bundles"
+def baseOsgiDir = "${baseLiferayDir}/osgi"
+def modulesDir = "${baseOsgiDir}/modules"
+
+platform {
+
+	fetchSources = false
+
+	bnd(group: 'com.lowagie', name: 'itext') {
+	
+		optionalImport 'com.apple.mrj', 'com.apple.mrj.*', 'com.lowagie.toolbox', 'com.lowagie.toolbox.*',
+				'org.bouncycastle', 'org.bouncycastle.*'
+	}
+	
+	bnd(group: 'xerces', name: 'xercesImpl') {
+	
+		optionalImport 'org.apache.xml.resolver', 'org.apache.xml.resolver.*', 'sun.io', 'sun.io.*'
+	}
+	
+	bnd(group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.xdocreport.converter.odt.odfdom', version: '2.0.1') {
+	
+		prependImport 'org.odftoolkit.odfdom.doc'
+	}
+}
+
+configure(bundles) {
+
+	group = "build"
+}
+
+dependencies {
+
+	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.0.0"
+	compileOnly group: "org.osgi", name: "osgi.cmpn", version: "6.0.0"
+
+	//compileOnly project("../report-generator-api")
+	
+	compile fileTree(dir: 'build/plugins', include: '*.jar')
+	
+	// XDocReport dependencies
+	platform group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.core", version: "2.0.1"
+	platform group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.document", version: "2.0.1"
+	platform group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.template", version: "2.0.1"
+	platform group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.converter", version: "2.0.1"
+	
+	// odt report
+	platform group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.document.odt", version: "2.0.1"
+	platform group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.xdocreport.template.freemarker', version: '2.0.1'
+	
+	// conversion from odt
+	platform group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.xdocreport.converter.odt.odfdom', version: '2.0.1'
+	platform group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.odfdom.converter.pdf', version: '2.0.1'
+	platform group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.odfdom.converter.xhtml', version: '2.0.1'
+	platform group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.odfdom.converter.core', version: '2.0.1'
+}
+
+task deployOsgi(type: Copy) {
+
+  group 'init'
+  from 'build/plugins'
+  into "${modulesDir}"
+  include '**/*.jar'
+  
+  dependsOn bundles
+}
+
+task cleanDeployOsgi(type: Delete) {
+
+	doLast {
+	
+		FileTree tree = fileTree(dir: "${modulesDir}")
+			
+		tree.each { File module ->
+		
+			if(file("build/plugins/${module.name}").exists()) {
+			
+				println "Deleting ${module.name} from ${modulesDir}"
+				
+				delete(module)		
+			}
+		}
+	}
+}
+
+deploy {
+
+	dependsOn deployOsgi
+}
