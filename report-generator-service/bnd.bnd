@@ -1,6 +1,6 @@
 Bundle-Name: report-generator-service
 Bundle-SymbolicName: it.dbb.report.internal
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.1
 
 #Bundle-ClassPath:\
 #	.,\
