@@ -1,6 +1,6 @@
 Bundle-Name: report-generator-api
 Bundle-SymbolicName: it.dbb.report.api
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.2
 Export-Package: \
 	it.dbb.report.api,\
 	it.dbb.report.api.exceptions
