@@ -21,6 +21,7 @@ import fr.opensagres.xdocreport.document.images.FileImageProvider;
 import fr.opensagres.xdocreport.document.registry.XDocReportRegistry;
 import fr.opensagres.xdocreport.template.IContext;
 import fr.opensagres.xdocreport.template.TemplateEngineKind;
+import fr.opensagres.xdocreport.template.formatter.FieldMetadata;
 import fr.opensagres.xdocreport.template.formatter.FieldsMetadata;
 
 public class ReportContext implements Closeable {
@@ -142,9 +143,8 @@ public class ReportContext implements Closeable {
 
 				try {
 
-					FieldsMetadata metadata = new FieldsMetadata();
+					FieldsMetadata metadata = getInputFieldsMetadata();
 					metadata.addFieldAsImage(key);
-					input.setFieldsMetadata(metadata);
 
 					return new ByteArrayImageProvider((InputStream) value);
 
@@ -157,15 +157,27 @@ public class ReportContext implements Closeable {
 
 				_log.info("Replacing object " + key + " with a " + FileImageProvider.class.getName());
 
-				FieldsMetadata metadata = new FieldsMetadata();
+				FieldsMetadata metadata = getInputFieldsMetadata();
 				metadata.addFieldAsImage(key);
-				input.setFieldsMetadata(metadata);
 
 				return new FileImageProvider((File) value);
 			}
 
 			return value;
 		});
+	}
+
+	protected FieldsMetadata getInputFieldsMetadata() {
+
+		FieldsMetadata fieldsMetadata = input.getFieldsMetadata();
+
+		if(fieldsMetadata == null) {
+
+			fieldsMetadata = new FieldsMetadata();
+			input.setFieldsMetadata(fieldsMetadata);
+		}
+
+		return fieldsMetadata;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(ReportContext.class);
