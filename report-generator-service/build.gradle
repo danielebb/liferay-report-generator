@@ -15,6 +15,11 @@ def baseLiferayDir = project.hasProperty('liferay.workspace.home.dir') ? "${proj
 def baseOsgiDir = "${baseLiferayDir}/osgi"
 def modulesDir = "${baseOsgiDir}/modules"
 
+configurations {
+
+	platform.exclude group: "xml-apis", module: "xml-apis"
+}
+
 platform {
 
 	fetchSources = false
@@ -46,7 +51,7 @@ dependencies {
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.0.0"
 	compileOnly group: "org.osgi", name: "osgi.cmpn", version: "6.0.0"
 
-	//compileOnly project("../report-generator-api")
+	compile project(":liferay-report-generator:report-generator-api")
 	
 	compile fileTree(dir: 'build/plugins', include: '*.jar')
 	
