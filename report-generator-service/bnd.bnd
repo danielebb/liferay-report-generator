@@ -1,14 +1,4 @@
-Bundle-Name: report-generator-service
-Bundle-SymbolicName: it.dbb.report.internal
+Bundle-Name: Report Generator Service
+GroupId: it.dbb.report
+Bundle-SymbolicName: it.dbb.report.service
 Bundle-Version: 1.0.2
-
-#Bundle-ClassPath:\
-#	.,\
-#	lib/fr.opensagres.xdocreport.converter-2.0.1.jar,\
-#	lib/fr.opensagres.xdocreport.core-2.0.1.jar,\
-#	lib/fr.opensagres.xdocreport.document-2.0.1.jar,\
-#	lib/fr.opensagres.xdocreport.template-2.0.1.jar,\
-#	lib/fr.opensagres.xdocreport.document.odt-2.0.1.jar,\
-#	lib/fr.opensagres.xdocreport.template.freemarker-2.0.1.jar
-	
-#Include-Resource: lib=lib;recursive:=true;filter:=*.jar

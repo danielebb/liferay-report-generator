@@ -1,4 +1,5 @@
-Bundle-Name: report-generator-api
+Bundle-Name: Report Generator API
+GroupId: it.dbb.report
 Bundle-SymbolicName: it.dbb.report.api
 Bundle-Version: 1.0.2
 Export-Package: \

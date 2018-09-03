@@ -23,6 +23,8 @@ configurations {
 platform {
 
 	fetchSources = false
+	useBndHashQualifiers = false
+	useFeatureHashQualifiers = false
 
 	bnd(group: 'com.lowagie', name: 'itext') {
 	
@@ -39,6 +41,22 @@ platform {
 	
 		prependImport 'org.odftoolkit.odfdom.doc'
 	}
+
+	// XDocReport dependencies
+	bundle group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.core", version: "2.0.1"
+	bundle group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.document", version: "2.0.1"
+	bundle group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.template", version: "2.0.1"
+	bundle group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.converter", version: "2.0.1"
+
+	// odt report
+	bundle group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.document.odt", version: "2.0.1"
+	bundle group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.xdocreport.template.freemarker', version: '2.0.1'
+
+	// conversion from odt
+	bundle group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.xdocreport.converter.odt.odfdom', version: '2.0.1'
+	bundle group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.odfdom.converter.pdf', version: '2.0.1'
+	bundle group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.odfdom.converter.xhtml', version: '2.0.1'
+	bundle group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.odfdom.converter.core', version: '2.0.1'
 }
 
 configure(bundles) {
@@ -51,25 +69,25 @@ dependencies {
 	compileOnly group: "com.liferay.portal", name: "com.liferay.portal.kernel", version: "2.0.0"
 	compileOnly group: "org.osgi", name: "osgi.cmpn", version: "6.0.0"
 
-	compile project(":liferay-report-generator:report-generator-api")
+	compile project(":apps:liferay-report-generator:report-generator-api")
 	
 	compile fileTree(dir: 'build/plugins', include: '*.jar')
-	
-	// XDocReport dependencies
-	platform group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.core", version: "2.0.1"
-	platform group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.document", version: "2.0.1"
-	platform group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.template", version: "2.0.1"
-	platform group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.converter", version: "2.0.1"
-	
-	// odt report
-	platform group: "fr.opensagres.xdocreport", name:"fr.opensagres.xdocreport.document.odt", version: "2.0.1"
-	platform group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.xdocreport.template.freemarker', version: '2.0.1'
-	
-	// conversion from odt
-	platform group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.xdocreport.converter.odt.odfdom', version: '2.0.1'
-	platform group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.odfdom.converter.pdf', version: '2.0.1'
-	platform group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.odfdom.converter.xhtml', version: '2.0.1'
-	platform group: 'fr.opensagres.xdocreport', name: 'fr.opensagres.odfdom.converter.core', version: '2.0.1'
+
+	compile 'it.dbb.report:com.lowagie.itext:1.0.2'
+	compile 'it.dbb.report:fr.opensagres.odfdom.converter.core:1.0.2'
+	compile 'it.dbb.report:fr.opensagres.odfdom.converter.pdf:1.0.2'
+	compile 'it.dbb.report:fr.opensagres.odfdom.converter.xhtml:1.0.2'
+	compile 'it.dbb.report:fr.opensagres.xdocreport.converter.odt.odfdom:1.0.2'
+	compile 'it.dbb.report:fr.opensagres.xdocreport.converter:1.0.2'
+	compile 'it.dbb.report:fr.opensagres.xdocreport.core:1.0.2'
+	compile 'it.dbb.report:fr.opensagres.xdocreport.document.odt:1.0.2'
+	compile 'it.dbb.report:fr.opensagres.xdocreport.document:1.0.2'
+	compile 'it.dbb.report:fr.opensagres.xdocreport.itext.extension:1.0.2'
+	compile 'it.dbb.report:fr.opensagres.xdocreport.template.freemarker:1.0.2'
+	compile 'it.dbb.report:fr.opensagres.xdocreport.template:1.0.2'
+	compile 'it.dbb.report:org.freemarker.freemarker:1.0.2'
+	compile 'it.dbb.report:org.odftoolkit.odfdom-java:1.0.2'
+	compile 'it.dbb.report:xerces.xercesImpl:1.0.2'
 }
 
 task deployOsgi(type: Copy) {
@@ -103,4 +121,11 @@ task cleanDeployOsgi(type: Delete) {
 deploy {
 
 	dependsOn deployOsgi
+}
+
+apply from: "$projectDir/dependencies-publishing.gradle"
+
+if((new File("$rootProject.projectDir/publishing.gradle")).exists()) {
+
+	apply from: "$rootProject.projectDir/publishing.gradle"
 }

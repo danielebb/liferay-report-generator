@@ -1,0 +1,149 @@
+apply plugin:'maven-publish'
+
+ext {
+
+    bndProperties = file("$project.projectDir/bnd.bnd")
+
+    if(bndProperties.exists()) {
+
+        bndProperties = bndProperties.text
+
+    } else {
+
+        bndProperties = ""
+    }
+
+    println bndProperties
+
+    findProjectArtifactId = (bndProperties =~ /Bundle-SymbolicName:\s*(.+)/)
+    projectArtifactId = (findProjectArtifactId.size() == 1) ? findProjectArtifactId[0][1] : "$project.group"
+
+    findProjectGroupId = (bndProperties =~ /GroupId:\s*(.+)/)
+    projectGroupId = (findProjectGroupId.size() >= 1) ? findProjectGroupId[0][1] : "$projectArtifactId"
+    println projectGroupId
+
+    /*
+    findProjectVersion = (bndProperties =~ /Bundle-Version:\s*(.+)/)
+    projectVersion = (findProjectVersion.size() == 1) ? findProjectVersion[0][1] : "$project.version"
+    println projectVersion
+
+    findProjectName = (bndProperties =~ /Bundle-Name:\s*(.+)/)
+    projectName = (findProjectName.size() == 1) ? findProjectName[0][1] : "$project.name"
+    println projectName
+
+    projectArtifact="$project.projectDir/build/libs/$projectGroupId-$projectVersion"+".jar"
+
+    println projectArtifact
+    */
+}
+
+publishing {
+
+    publications {
+
+        comLowagieItext(MavenPublication) {
+
+            artifactId = 'com.lowagie.itext'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/com.lowagie.itext_2.1.7.autowrapped.jar")
+        }
+
+        frOpensagresOdfdomConverterCore(MavenPublication) {
+
+            artifactId = 'fr.opensagres.odfdom.converter.core'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/fr.opensagres.odfdom.converter.core_2.0.1.jar")
+        }
+
+        frOpensagresOdfdomConverterPdf(MavenPublication) {
+
+            artifactId = 'fr.opensagres.odfdom.converter.pdf'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/fr.opensagres.odfdom.converter.pdf_2.0.1.jar")
+        }
+
+        frOpensagresOdfdomConverterXhtml(MavenPublication) {
+
+            artifactId = 'fr.opensagres.odfdom.converter.xhtml'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/fr.opensagres.odfdom.converter.xhtml_2.0.1.jar")
+        }
+
+        frOpensagresXdocreportConverterOdtOdfdom(MavenPublication) {
+
+            artifactId = 'fr.opensagres.xdocreport.converter.odt.odfdom'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/fr.opensagres.xdocreport.converter.odt.odfdom_2.0.1.autowrapped.jar")
+        }
+
+        frOpensagresXdocreportConverter(MavenPublication) {
+
+            artifactId = 'fr.opensagres.xdocreport.converter'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/fr.opensagres.xdocreport.converter_2.0.1.jar")
+        }
+
+        frOpensagresXdocreportCore(MavenPublication) {
+
+            artifactId = 'fr.opensagres.xdocreport.core'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/fr.opensagres.xdocreport.core_2.0.1.jar")
+        }
+
+        frOpensagresXdocreportDocumentOdt(MavenPublication) {
+
+            artifactId = 'fr.opensagres.xdocreport.document.odt'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/fr.opensagres.xdocreport.document.odt_2.0.1.jar")
+        }
+
+        frOpensagresXdocreportDocument(MavenPublication) {
+
+            artifactId = 'fr.opensagres.xdocreport.document'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/fr.opensagres.xdocreport.document_2.0.1.jar")
+        }
+
+        frOpensagresXdocreportItextExtension(MavenPublication) {
+
+            artifactId = 'fr.opensagres.xdocreport.itext.extension'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/fr.opensagres.xdocreport.itext.extension_2.0.1.jar")
+        }
+
+        frOpensagresXdocreportTemplateFreemarker(MavenPublication) {
+
+            artifactId = 'fr.opensagres.xdocreport.template.freemarker'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/fr.opensagres.xdocreport.template.freemarker_2.0.1.jar")
+        }
+
+        frOpensagresXdocreportTemplate(MavenPublication) {
+
+            artifactId = 'fr.opensagres.xdocreport.template'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/fr.opensagres.xdocreport.template_2.0.1.jar")
+        }
+
+        orgFreemarkerFreemarker(MavenPublication) {
+
+            artifactId = 'org.freemarker.freemarker'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/org.freemarker.freemarker_2.3.20.stable.jar")
+        }
+
+        orgOdftoolkitOdfdomJava(MavenPublication) {
+
+            artifactId = 'org.odftoolkit.odfdom-java'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/org.odftoolkit.odfdom-java_0.8.7.autowrapped.jar")
+        }
+
+        xercesXercesImpl(MavenPublication) {
+
+            artifactId = 'xerces.xercesImpl'
+            groupId = "$projectGroupId"
+            artifact file("$buildDir/plugins/xerces.xercesImpl_2.9.1.autowrapped.jar")
+        }
+    }
+}
