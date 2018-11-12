@@ -4,11 +4,13 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.StreamUtil;
+import com.liferay.portal.kernel.util.StringPool;
 import com.liferay.portal.kernel.util.Validator;
 
 import fr.opensagres.xdocreport.converter.ConverterTypeTo;
@@ -23,6 +25,7 @@ import fr.opensagres.xdocreport.template.IContext;
 import fr.opensagres.xdocreport.template.TemplateEngineKind;
 import fr.opensagres.xdocreport.template.formatter.FieldMetadata;
 import fr.opensagres.xdocreport.template.formatter.FieldsMetadata;
+import fr.opensagres.xdocreport.template.formatter.NullImageBehaviour;
 
 public class ReportContext implements Closeable {
 
@@ -33,8 +36,7 @@ public class ReportContext implements Closeable {
 	private boolean report;
 	private boolean convert;
 
-	public ReportContext(InputStream inputStream, String mimeTypeIn, String mimeTypeOut, Map<String, Object> context)
-			throws XDocReportException, IOException {
+	public ReportContext(InputStream inputStream, String mimeTypeIn, String mimeTypeOut, Map<String, Object> context) throws XDocReportException, IOException {
 
 		originalInputStream = inputStream;
 
@@ -46,7 +48,7 @@ public class ReportContext implements Closeable {
 			this.context = input.createContext(context);
 			this.report = true;
 
-			injectImages(context);
+			injectImages(StringPool.BLANK, context);
 
 		} else {
 
@@ -133,51 +135,83 @@ public class ReportContext implements Closeable {
 		return XDocReportRegistry.getRegistry().loadReport(inputStream, TemplateEngineKind.Freemarker);
 	}
 
-	protected void injectImages(Map<String, Object> context) {
+	protected void injectImages(String fieldNamePrefix, Map context) {
 
-		context.replaceAll((key, value) -> {
+		context.replaceAll((key, value) -> injectImage(fieldNamePrefix, key, value));
+	}
 
-			if (value instanceof InputStream) {
+	protected void injectImages(String fieldNamePrefix, String key, List list) {
 
-				_log.info("Replacing object " + key + " with a " + ByteArrayImageProvider.class.getName());
+		FieldsMetadata metadata = getInputFieldsMetadata();
+		metadata.addFieldAsList(appendFieldName(fieldNamePrefix, key));
 
-				try {
+		list.replaceAll(valueElement -> injectImage(StringPool.BLANK, key.concat("Item"), valueElement));
+	}
 
-					FieldsMetadata metadata = getInputFieldsMetadata();
-					metadata.addFieldAsImage(key);
+	protected Object injectImage(String fieldNamePrefix, Object key, Object value) {
 
-					return new ByteArrayImageProvider((InputStream) value);
+		if (value instanceof InputStream) {
 
-				} catch (IOException e) {
+			String fieldName = appendFieldName(fieldNamePrefix, key.toString());
 
-					_log.error(e);
-				}
+			_log.info("Replacing object " + key + " with a " + ByteArrayImageProvider.class.getName());
 
-			} else if (value instanceof File) {
-
-				_log.info("Replacing object " + key + " with a " + FileImageProvider.class.getName());
+			try {
 
 				FieldsMetadata metadata = getInputFieldsMetadata();
-				metadata.addFieldAsImage(key);
+				metadata.addFieldAsImage(key.toString(), fieldName, NullImageBehaviour.RemoveImageTemplate);
 
-				return new FileImageProvider((File) value);
+				return new ByteArrayImageProvider((InputStream) value);
+
+			} catch (IOException e) {
+
+				_log.error(e);
 			}
 
-			return value;
-		});
+		} else if (value instanceof File) {
+
+			String fieldName = appendFieldName(fieldNamePrefix, key.toString());
+
+			_log.info("Replacing object " + key + " with a " + FileImageProvider.class.getName());
+
+			FieldsMetadata metadata = getInputFieldsMetadata();
+			metadata.addFieldAsImage(key.toString(), fieldName, NullImageBehaviour.RemoveImageTemplate);
+
+			return new FileImageProvider((File) value);
+
+		} else if (value instanceof Map) {
+
+			injectImages(appendFieldName(fieldNamePrefix, key.toString()), (Map) value);
+
+		} else if (value instanceof List) {
+
+			injectImages(fieldNamePrefix, key.toString(), (List) value);
+		}
+
+		return value;
 	}
 
 	protected FieldsMetadata getInputFieldsMetadata() {
 
 		FieldsMetadata fieldsMetadata = input.getFieldsMetadata();
 
-		if(fieldsMetadata == null) {
+		if (fieldsMetadata == null) {
 
 			fieldsMetadata = new FieldsMetadata();
 			input.setFieldsMetadata(fieldsMetadata);
 		}
 
 		return fieldsMetadata;
+	}
+
+	protected String appendFieldName(String fieldNamePrefix, String fieldName) {
+
+		if (Validator.isNotNull(fieldNamePrefix)) {
+
+			return fieldNamePrefix.concat(StringPool.PERIOD).concat(fieldName);
+		}
+
+		return fieldName;
 	}
 
 	private static final Log _log = LogFactoryUtil.getLog(ReportContext.class);
